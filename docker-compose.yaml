@@ -33,8 +33,14 @@ services:
     depends_on:
       - spark-master
 
+  debug-container:
+    image: alipne
+    container_name: debug-container
+    command: sleep 3600
+    depends_on:
+      - spark-master
+
+
   
-
-
 volumes:
   minio_data:
