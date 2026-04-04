@@ -29,7 +29,7 @@ services:
     image: apache/spark:3.5.0
     container_name: spark-worker
     entrypoint: /opt/spark/bin/spark-class
-    command: org.apache.spark.deploy.master.Worker spark://spark-master:7077
+    command: org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     depends_on:
       - spark-master
 
