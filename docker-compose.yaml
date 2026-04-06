@@ -19,6 +19,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    
+    restart: unless-stopped
 
   spark-master:
     image: apache/spark:3.5.0
@@ -36,6 +38,8 @@ services:
       timeout: 10s
       retries: 3
 
+    restart: unless-stopped
+
   spark-worker:
     image: apache/spark:3.5.0
     container_name: spark-worker
@@ -44,7 +48,7 @@ services:
     depends_on:
       - spark-master
 
-
+    restart: unless-stopped
 
   
 volumes:
