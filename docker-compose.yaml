@@ -27,6 +27,7 @@ services:
     container_name: spark-master
     entrypoint: /opt/spark/bin/spark-class
     command: org.apache.spark.deploy.master.Master
+    user: root
     ports:
       - "8080:8080"
       - "7077:7077"
@@ -53,13 +54,60 @@ services:
     command: org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     depends_on:
       - spark-master
-  
+    user: root  
     environment:
       MINIO_ENDPOINT: http://minio:9000
       MINIO_ACCESS_KEY: admin
       MINIO_SECRET_KEY: password
 
     restart: unless-stopped
+
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    environment:
+      postgres_user: airflow
+      postgres_password: airflow
+      postgres_db: airflow
+    
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    
+    healthcheck:
+      test: ["CMD","pg_isready","-U","airflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    
+    retart: until-stopped
+
+
+  airflow-webserver:
+    image: apache/airflow:2.7.3
+    container_name: airflow-webserver
+    command: webserver
+    ports:
+      - "8081:8080"
+    depends_on: ["postgres","airflow-scheduler"]
+    environment:
+      AIRFLOW__CORE__EXECUTOR: localExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: airflow
+      postgres_db: airflow
+     
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    
+    healthcheck:
+      test: ["CMD","pg_isready","-U","airflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    
+    retart: until-stopped
+  
+
+  
+  
 
   
 volumes:
