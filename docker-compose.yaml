@@ -109,8 +109,9 @@ services:
   airflow-scheduler:
     image: apache/airflow:2.7.3
     container_name: airflow-scheduler
-    command: scheduler
+    command: bash c "pip install apache-airflow-providers-docker && airflow scheduler"
     depends_on: ["postgres"]
+    user: root
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
@@ -119,6 +120,8 @@ services:
     volumes:
       - ./dags:/opt/airflow/dags
       - airflow_logs:/opt/airflow/logs
+      - /var/run/docker.sock:/var/run/docker.sock
+
   
     restart: unless-stopped
 
