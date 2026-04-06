@@ -64,3 +64,4 @@ services:
   
 volumes:
   minio_data:
+  spark_ivy_cache:
