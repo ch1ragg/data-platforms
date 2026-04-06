@@ -13,16 +13,17 @@ with DAG(
     submit_spark_job = DockerOperator(
         task_id="submit_trip_analysis",
         image="apache/spark:3.5.0",
+        user="root",
         command="""
-            /opt/spark/bin/spark-submit 
+            bash -c "mkdir -p /home/spark/.ivy2 && /opt/spark/bin/spark-submit 
             --master spark://spark-master:7077 
             --packages org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 
-            /opt/spark-jobs/process_trips.py
+            /opt/spark-jobs/process_trips.py"
         """,
         network_mode="data-platforms_default",
         mounts=[
             Mount(
-                source="/c/workspace/learnings/platform-engineering/data-platforms/spark-jobs",
+                source="C:/Users/everb/OneDrive/Desktop/data-platforms/spark-jobs",
                 target="/opt/spark-jobs",
                 type="bind",
                 read_only=True,
