@@ -66,9 +66,9 @@ services:
     image: postgres:13
     container_name: postgres
     environment:
-      postgres_user: airflow
-      postgres_password: airflow
-      postgres_db: airflow
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
     
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -79,7 +79,7 @@ services:
       timeout: 5s
       retries: 5
     
-    retart: until-stopped
+    restart: unless-stopped
 
 
   airflow-webserver:
@@ -90,26 +90,57 @@ services:
       - "8081:8080"
     depends_on: ["postgres","airflow-scheduler"]
     environment:
-      AIRFLOW__CORE__EXECUTOR: localExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: airflow
-      postgres_db: airflow
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
      
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./dags:/opt/airflow/dags
+      - airflow_logs:/opt/airflow/logs
     
     healthcheck:
-      test: ["CMD","pg_isready","-U","airflow"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD","curl","-f","http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     
-    retart: until-stopped
-  
+    restart: unless-stopped
 
-  
-  
+  airflow-scheduler:
+    image: apache/airflow:2.7.3
+    container_name: airflow-scheduler
+    command: scheduler
+    depends_on: ["postgres"]
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
 
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - airflow_logs:/opt/airflow/logs
   
+    restart: unless-stopped
+
+  airflow-init:
+    image: apache/airflow:2.7.3
+    container_name: airflow-init
+    command: bash -c "airflow db migrate && airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email everbestchirag3@gmail.com"
+    depends_on: ["postgres"]
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - airflow_logs:/opt/airflow/logs
+    
+    restart: "no"
+
+    
 volumes:
   minio_data:
   spark_ivy_cache:
+  postgres_data:
+  airflow_logs:
