@@ -38,6 +38,11 @@ services:
       timeout: 10s
       retries: 3
 
+    environment:
+        MINIO_ENDPOINT: http://minio:9000
+        MINIO_ACCESS_KEY: admin
+        MINIO_SECRET_KEY: password
+
     restart: unless-stopped
 
   spark-worker:
@@ -47,6 +52,11 @@ services:
     command: org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     depends_on:
       - spark-master
+  
+    environment:
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: admin
+      MINIO_SECRET_KEY: password
 
     restart: unless-stopped
 
