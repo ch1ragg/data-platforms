@@ -32,6 +32,7 @@ services:
       - "7077:7077"
     volumes:
       - ./spark-jobs:/opt/spark-jobs
+      - spark_ivy_cache:/home/spark/.ivy2
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080"]
       interval: 30s
