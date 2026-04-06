@@ -109,7 +109,7 @@ services:
   airflow-scheduler:
     image: apache/airflow:2.7.3
     container_name: airflow-scheduler
-    command: bash -c "pip install apache-airflow-providers-docker && airflow scheduler"
+    command: bash -c "curl -fsSL https://download.docker.com/linux/static/stable/x86_64/docker-24.0.7.tgz | tar xz --strip-components=1 -C /usr/local/bin docker/docker && airflow scheduler"
     depends_on: ["postgres"]
     user: "50000:0"
     environment:
