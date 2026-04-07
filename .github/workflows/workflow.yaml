@@ -1,0 +1,25 @@
+name: Data Platform CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+
+jobs:
+  validate:
+    name: Validate Configuration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Validate Docker Compose syntax
+        run: docker compose config --quiet
+
+      - name: Validate Airflow DAGs
+        run: python3 -c "import py_compile; py_compile.compile('dags/dag.py', doraise=True)"
+
+      - name: Validate Spark syntax
+        run: python3 -c "import py_compile; py_compile.compile('spark-jobs/process_trips.py', doraise=True)"
